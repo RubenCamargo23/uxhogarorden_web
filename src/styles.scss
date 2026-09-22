@@ -1,1 +1,140 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-primary: #3a6f60;
+  --color-primary-dark: #2f5b4f;
+  --color-primary-soft: #e3ece8;
+  --color-text: #2b2b28;
+  --color-text-muted: #6b6b66;
+  --color-border: #e7e4de;
+  --color-page-bg: #faf9f6;
+  --color-card-bg: #ffffff;
+  --color-danger: #c1442b;
+  --color-danger-soft: #fbe3dd;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--color-text);
+  background: var(--color-page-bg);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn--ghost {
+  background: var(--color-card-bg);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn--primary {
+  background: var(--color-primary-dark);
+  color: #fff;
+
+  &:hover {
+    background: var(--color-primary);
+  }
+}
+
+.btn--outline {
+  background: none;
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn--full {
+  width: 100%;
+  justify-content: center;
+}
+
+.pill {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pill--success {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}
+
+.pill--warning {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.tabs {
+  display: flex;
+  background: var(--color-page-bg);
+  border-radius: 0.75rem;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.tab {
+  border: none;
+  background: none;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab--active {
+  background: var(--color-card-bg);
+  color: var(--color-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge--in-progress {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}
+
+.status-badge--pending {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.status-badge--done {
+  background: #ece9e3;
+  color: var(--color-text-muted);
+}

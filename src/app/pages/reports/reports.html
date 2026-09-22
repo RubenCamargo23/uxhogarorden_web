@@ -1,0 +1,219 @@
+<app-shell activeNav="reports" breadcrumb="Vista de gestión">
+  <div class="page-heading">
+    <div>
+      <div class="page-heading__eyebrow">
+        <span class="step-badge">07</span>
+        <span>Análisis &amp; Rendimiento Doméstico</span>
+      </div>
+      <h1>Reportes de Desempeño y Cumplimiento</h1>
+      <p>
+        Evaluación objetiva del reparto de cargas, constancia periódica y trazabilidad operativa
+        de la Casa Principal.
+      </p>
+    </div>
+    <div class="page-heading__actions">
+      <button type="button" class="btn btn--ghost">📅 Rango: Últimos 30 días</button>
+      <button type="button" class="btn btn--primary">⭳ Exportar informe (PDF/CSV)</button>
+    </div>
+  </div>
+
+  <section class="stats-grid">
+    @for (stat of stats; track stat.label) {
+      <article class="stat-card">
+        <div class="stat-card__top">
+          <span class="stat-card__label">{{ stat.label }}</span>
+          <span class="stat-card__icon" [class]="'stat-card__icon--' + stat.tone">{{ stat.icon }}</span>
+        </div>
+        <p class="stat-card__value">{{ stat.value }}</p>
+      </article>
+    }
+  </section>
+
+  <section class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <div>
+          <h2>Cumplimiento por miembro</h2>
+          <p>Porcentaje de tareas completadas a tiempo</p>
+        </div>
+        <span class="chart-card__icon" aria-hidden="true">📶</span>
+      </div>
+
+      <ul class="compliance-list">
+        @for (member of memberCompliance; track member.name) {
+          <li>
+            <div class="compliance-list__row">
+              <span>{{ member.name }}</span>
+              <strong>{{ member.percentage }}%</strong>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-track__fill"
+                [class]="'progress-track__fill--' + member.tone"
+                [style.width.%]="member.percentage"
+              ></div>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <div class="callout">
+        <span class="callout__dot" aria-hidden="true"></span>
+        <span>Meta del hogar: {{ householdGoal }}% de rigor</span>
+        <strong>{{ membersAboveGoal }} superaron</strong>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <div>
+          <h2>Tareas por semana</h2>
+          <p>Evolución en las últimas 6 semanas</p>
+        </div>
+        <span class="trend-badge">↗ {{ weeklyChange }}</span>
+      </div>
+
+      <div class="sparkline">
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          role="img"
+          aria-label="Tendencia de tareas completadas por semana, en aumento"
+        >
+          <line x1="0" y1="25" x2="100" y2="25" class="sparkline__grid" />
+          <line x1="0" y1="60" x2="100" y2="60" class="sparkline__grid" />
+          <polygon [attr.points]="sparklineArea()" class="sparkline__area" />
+          <polyline [attr.points]="sparklinePoints()" class="sparkline__line" />
+          @for (point of weeklyTasks; track point.label; let i = $index) {
+            <circle
+              [attr.cx]="pointCoordinates(i).x"
+              [attr.cy]="pointCoordinates(i).y"
+              r="3.2"
+              class="sparkline__dot"
+            />
+          }
+        </svg>
+      </div>
+
+      <p class="sparkline__labels">
+        @for (point of weeklyTasks; track point.label; let last = $last) {
+          <span [class.sparkline__labels--current]="last">{{ point.label }}: {{ point.value }}</span>
+        }
+      </p>
+
+      <div class="callout">
+        <span class="callout__icon" aria-hidden="true">🛡</span>
+        <span>Pico histórico alcanzado en la Semana 43.</span>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <div>
+          <h2>Distribución por categoría</h2>
+          <p>Volumen de horas dedicadas</p>
+        </div>
+        <span class="chart-card__icon" aria-hidden="true">◐</span>
+      </div>
+
+      <div class="donut-wrapper">
+        <div class="donut" [style.background]="donutGradient()">
+          <div class="donut__hole">
+            <span class="donut__value">{{ totalHours }}</span>
+            <span class="donut__label">hrs totales</span>
+          </div>
+        </div>
+      </div>
+
+      <ul class="legend-grid">
+        @for (share of categoryShares; track share.name) {
+          <li>
+            <span class="legend-grid__dot" [class]="'legend-grid__dot--' + share.tone"></span>
+            {{ share.name }} ({{ share.percentage }}%)
+          </li>
+        }
+      </ul>
+
+      <p class="chart-card__footnote">Equilibrio operativo dentro de parámetros previstos.</p>
+    </div>
+  </section>
+
+  <section class="log-card">
+    <div class="log-card__header">
+      <div>
+        <h2>Historial de tareas ejecutadas</h2>
+        <p>Auditoría cronológica y control de tiempos asignados</p>
+      </div>
+      <div class="log-card__filters">
+        <button type="button" class="btn btn--ghost">📅 01 Oct 2024 – 31 Oct 2024</button>
+        <button type="button" class="btn btn--ghost">Todas las categorías</button>
+        <div class="search-field">
+          <span aria-hidden="true">🔍</span>
+          <label class="visually-hidden" for="log-search">Filtrar tarea</label>
+          <input id="log-search" type="search" placeholder="Filtrar tarea..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Responsable</th>
+            <th>Fecha programada</th>
+            <th>Fecha completado</th>
+            <th>Puntos</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of taskLog; track entry.name) {
+            <tr>
+              <td class="task-name">
+                <span class="task-name__dot" [class]="'task-name__dot--' + entry.categoryTone"></span>
+                {{ entry.name }}
+              </td>
+              <td>
+                <div class="assignee">
+                  <span class="assignee__avatar">{{ entry.responsibleInitials }}</span>
+                  {{ entry.responsible }}
+                </div>
+              </td>
+              <td>{{ entry.scheduledDate }}</td>
+              <td [class.completed-date--late]="entry.status === 'late'">{{ entry.completedDate }}</td>
+              <td class="points-cell">{{ entry.points }} pts</td>
+              <td>
+                <span class="status-chip" [class]="'status-chip--' + entry.status">
+                  ● {{ entry.status === 'on-time' ? 'A tiempo' : 'Con retraso' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="log-card__footer">
+      <span>Mostrando <strong>{{ rangeStart() }} – {{ rangeEnd() }}</strong> de <strong>{{ totalEntries }}</strong> registros certificados</span>
+      <div class="log-card__pagination">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          [disabled]="currentPage() === 1"
+          (click)="setPage(currentPage() - 1)"
+        >
+          ← Anterior
+        </button>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          [disabled]="currentPage() === totalPages()"
+          (click)="setPage(currentPage() + 1)"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+  </section>
+</app-shell>

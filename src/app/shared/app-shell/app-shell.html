@@ -1,0 +1,83 @@
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Navegación principal">
+    <div class="sidebar__brand">
+      <div class="sidebar__logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M4 11.5L12 4l8 7.5"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path d="M10 20v-5h4v5" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div>
+        <p class="sidebar__title">Hogar en Orden</p>
+        <p class="sidebar__subtitle">Coordinación del hogar</p>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      @for (link of navLinks; track link.key) {
+        @if (link.route) {
+          <a class="nav-item" [class.nav-item--active]="activeNav() === link.key" [routerLink]="link.route">
+            <span class="nav-item__icon">{{ link.icon }}</span>
+            {{ link.label }}
+          </a>
+        } @else {
+          <a class="nav-item" [class.nav-item--active]="activeNav() === link.key" href="#">
+            <span class="nav-item__icon">{{ link.icon }}</span>
+            {{ link.label }}
+          </a>
+        }
+      }
+    </nav>
+
+    <button type="button" class="household-switcher">
+      <span class="household-switcher__icon" aria-hidden="true">⌂</span>
+      <span class="household-switcher__text">
+        <span class="household-switcher__name">Casa Principal</span>
+        <span class="household-switcher__meta">4 Miembros activos</span>
+      </span>
+      <span aria-hidden="true">⌃⌄</span>
+    </button>
+  </aside>
+
+  <div class="main-column">
+    <header class="topbar">
+      <p class="breadcrumb">Hogar en Orden <span>›</span> <strong>{{ breadcrumb() }}</strong></p>
+
+      <div class="topbar__actions">
+        <div class="search-field">
+          <span aria-hidden="true">🔍</span>
+          <label class="visually-hidden" for="shell-search">Buscar tareas, miembros</label>
+          <input id="shell-search" type="search" placeholder="Buscar tareas, miembros..." />
+        </div>
+        <button type="button" class="icon-button" aria-label="Notificaciones">
+          🔔
+          <span class="icon-button__dot" aria-hidden="true"></span>
+        </button>
+        <div class="user-chip">
+          <img src="https://i.pravatar.cc/64?img=12" alt="" class="user-chip__avatar" />
+          <div>
+            <p class="user-chip__name">Rubén C.</p>
+            <p class="user-chip__role">Administrador</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <ng-content />
+    </main>
+  </div>
+</div>

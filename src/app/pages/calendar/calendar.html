@@ -1,0 +1,183 @@
+<app-shell activeNav="calendar" breadcrumb="Vista de gestión">
+  <div class="page-heading">
+    <div class="month-nav">
+      <button type="button" class="month-nav__arrow" aria-label="Mes anterior">‹</button>
+      <h1>{{ monthLabel }}</h1>
+      <button type="button" class="month-nav__arrow" aria-label="Mes siguiente">›</button>
+      <button type="button" class="btn btn--ghost">Hoy</button>
+    </div>
+    <div class="page-heading__actions">
+      <div class="view-toggle">
+        @for (mode of viewModes; track mode) {
+          <button
+            type="button"
+            class="view-toggle__option"
+            [class.view-toggle__option--active]="viewMode() === mode"
+            (click)="setViewMode(mode)"
+          >
+            {{ mode }}
+          </button>
+        }
+      </div>
+      <button type="button" class="btn btn--primary">+ Evento de limpieza</button>
+    </div>
+  </div>
+
+  <section class="stats-grid">
+    @for (stat of stats; track stat.label) {
+      <article class="stat-card">
+        <div class="stat-card__top">
+          <span class="stat-card__label">{{ stat.label }}</span>
+          <span class="stat-card__icon" [class]="'stat-card__icon--' + stat.tone">{{ stat.icon }}</span>
+        </div>
+        <p class="stat-card__value">{{ stat.value }}</p>
+      </article>
+    }
+  </section>
+
+  <section class="filter-bar">
+    <span class="filter-bar__label">🎨 Filtro de Responsables:</span>
+    <div class="filter-bar__chips">
+      @for (filter of assigneeFilters; track filter.key) {
+        <span class="filter-chip">
+          <span class="filter-chip__dot" [class]="'filter-chip__dot--' + filter.key"></span>
+          {{ filter.label }}
+        </span>
+      }
+    </div>
+    <button type="button" class="link-button">☰ Ajustar filtros</button>
+  </section>
+
+  <section class="calendar-card">
+    <div class="calendar-grid calendar-grid--head">
+      @for (day of weekdays; track day) {
+        <div class="calendar-grid__head-cell">{{ day }}</div>
+      }
+    </div>
+
+    <div class="calendar-grid">
+      @for (day of calendarDays; track $index) {
+        <div
+          class="calendar-cell"
+          [class.calendar-cell--muted]="!day.isCurrentMonth"
+          [class.calendar-cell--today]="day.isToday"
+        >
+          <div class="calendar-cell__header">
+            <span class="calendar-cell__date">{{ day.date }}</span>
+            @if (day.monthLabel) {
+              <span class="calendar-cell__month">{{ day.monthLabel }}</span>
+            }
+            @if (day.isToday) {
+              <span class="today-badge">HOY</span>
+            }
+          </div>
+
+          <div class="calendar-cell__events">
+            @for (event of day.events; track event.label) {
+              <div class="event-pill" [class]="'event-pill--' + event.assignee">
+                @if (event.time) {
+                  <span class="event-pill__time">{{ event.time }}</span>
+                }
+                {{ event.label }}
+              </div>
+            }
+            @if (day.extraCount) {
+              <div class="event-more">+{{ day.extraCount }} rutina nocturna</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="bottom-grid">
+    <div class="panel-card">
+      <div class="panel-card__header">
+        <span class="panel-card__icon" aria-hidden="true">📅</span>
+        <h2>Detalle de Hoy (14 Oct)</h2>
+        <span class="pill pill--success">4 Asignaciones</span>
+      </div>
+
+      <ul class="today-list">
+        @for (event of todayEvents; track event.label) {
+          <li>
+            <span class="today-list__dot" [class]="'today-list__dot--' + event.assignee"></span>
+            <div class="today-list__body">
+              <p class="today-list__title">{{ event.label }}</p>
+              <p class="today-list__meta">{{ zoneFor(event.label) }}</p>
+            </div>
+            <span class="today-list__time">{{ event.time }}</span>
+          </li>
+        }
+      </ul>
+
+      <a href="#" class="link-arrow">Ver desglose completo de tareas →</a>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card__header">
+        <span class="panel-card__icon" aria-hidden="true">📆</span>
+        <h2>Jornada Intensiva Mensual</h2>
+        <span class="pill pill--warning">En 5 días</span>
+      </div>
+
+      <div class="jornada-card">
+        <img
+          src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&q=80"
+          alt=""
+          class="jornada-card__image"
+        />
+        <div class="jornada-card__overlay">
+          <h3>Limpieza Profunda &amp; Ventanas</h3>
+          <p>Sábado 19 de Octubre • 09:30 AM</p>
+        </div>
+      </div>
+
+      <p class="jornada-card__description">
+        Participación conjunta de todos los miembros. Se sincronizarán las zonas de balcón,
+        lavado de filtros de aire acondicionado y rotación de despensa.
+      </p>
+
+      <div class="jornada-card__footer">
+        <div class="avatar-stack">
+          <span class="avatar-stack__item avatar-stack__item--ruben">R</span>
+          <span class="avatar-stack__item avatar-stack__item--sofia">S</span>
+          <span class="avatar-stack__item avatar-stack__item--mateo">M</span>
+          <span class="avatar-stack__item avatar-stack__item--lucia">L</span>
+        </div>
+        <a href="#" class="link-arrow">Gestionar protocolo</a>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card__header">
+        <span class="panel-card__icon" aria-hidden="true">◐</span>
+        <h2>Equidad Semanal</h2>
+        <span class="week-tag">Semana 42</span>
+      </div>
+
+      <ul class="equity-list">
+        @for (member of equityMembers; track member.name) {
+          <li>
+            <div class="equity-list__row">
+              <span>{{ member.name }}</span>
+              <span>{{ member.tasks }} tareas ({{ member.percentage }}%)</span>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-track__fill"
+                [class]="'progress-track__fill--' + member.tone"
+                [style.width.%]="member.percentage"
+              ></div>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <div class="callout">
+        <span aria-hidden="true">⚙</span>
+        <span>Distribución balanceada sin sobrecarga para ningún conviviente.</span>
+      </div>
+    </div>
+  </section>
+</app-shell>
