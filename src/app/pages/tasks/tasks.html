@@ -1,0 +1,203 @@
+<app-shell activeNav="tasks" breadcrumb="Vista de gestión">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Inventario doméstico</p>
+      <h1>Catálogo y Gestión de Tareas</h1>
+      <p>Sistematización de labores, cargas de esfuerzo y periodicidad del hogar.</p>
+    </div>
+    <div class="page-heading__actions">
+      <button type="button" class="btn btn--ghost">⭳ Exportar</button>
+      <button type="button" class="btn btn--primary">+ Nueva tarea</button>
+    </div>
+  </div>
+
+  <section class="tasks-layout">
+    <aside class="filters-card" aria-label="Filtros de tareas">
+      <div class="filters-card__header">
+        <h2>▤ Filtros</h2>
+        <button type="button" class="link-button" (click)="clearFilters()">Limpiar filtros</button>
+      </div>
+
+      <div class="filter-group">
+        <h3>Buscador interno</h3>
+        <div class="search-field">
+          <span aria-hidden="true">🔍</span>
+          <label class="visually-hidden" for="task-search">Filtrar por nombre o zona</label>
+          <input
+            id="task-search"
+            type="search"
+            placeholder="Filtrar por nombre o zona..."
+            [(ngModel)]="searchTerm"
+          />
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3>Categoría</h3>
+        <ul class="checkbox-list">
+          @for (option of categoryOptions; track option.name) {
+            <li>
+              <label class="checkbox-field">
+                <input
+                  type="checkbox"
+                  [checked]="isCategorySelected(option.name)"
+                  (change)="toggleCategory(option.name)"
+                />
+                <span>{{ option.name }}</span>
+              </label>
+              <span class="count-badge">{{ option.count }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="filter-group">
+        <h3>Frecuencia</h3>
+        <ul class="radio-list">
+          @for (option of frequencyOptions; track option) {
+            <li>
+              <label class="radio-field">
+                <input
+                  type="radio"
+                  name="frequency"
+                  [value]="option"
+                  [checked]="frequencyFilter() === option"
+                  (change)="setFrequency(option)"
+                />
+                <span>{{ option }}</span>
+              </label>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="filter-group">
+        <h3>Nivel de esfuerzo / puntos</h3>
+        <ul class="radio-list">
+          <li>
+            <label class="radio-field">
+              <input
+                type="radio"
+                name="effort"
+                [checked]="effortFilter() === 'all'"
+                (change)="setEffort('all')"
+              />
+              <span>Todos los niveles</span>
+            </label>
+          </li>
+          <li>
+            <label class="radio-field">
+              <input
+                type="radio"
+                name="effort"
+                [checked]="effortFilter() === 'low'"
+                (change)="setEffort('low')"
+              />
+              <span>1-3 pts (Leve)</span>
+            </label>
+          </li>
+          <li>
+            <label class="radio-field">
+              <input
+                type="radio"
+                name="effort"
+                [checked]="effortFilter() === 'medium'"
+                (change)="setEffort('medium')"
+              />
+              <span>4-6 pts (Medio)</span>
+            </label>
+          </li>
+          <li>
+            <label class="radio-field">
+              <input
+                type="radio"
+                name="effort"
+                [checked]="effortFilter() === 'high'"
+                (change)="setEffort('high')"
+              />
+              <span>7-10 pts (Intenso)</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="tasks-panel">
+      <div class="tasks-panel__header">
+        <p class="tasks-panel__count">☰ Mostrando {{ totalTasks }} tareas registradas</p>
+        <label class="sort-field">
+          Ordenar por:
+          <select>
+            <option>Mayor prioridad</option>
+            <option>Nombre A-Z</option>
+            <option>Menor esfuerzo</option>
+            <option>Frecuencia</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="task-grid">
+        @for (task of filteredTasks(); track task.name) {
+          <article class="task-card">
+            <div class="task-card__top">
+              <span class="category-tag">{{ task.category }}</span>
+              <span class="points-badge" [class]="'points-badge--' + pointsTone(task.points)">
+                {{ task.points }} pts
+              </span>
+            </div>
+            <h3>{{ task.name }}</h3>
+            <p class="task-card__description">{{ task.description }}</p>
+            <p class="task-card__meta">
+              <span>🕐 {{ task.duration }}</span>
+              <span>⇄ {{ task.frequency }}</span>
+            </p>
+            <div class="task-card__footer">
+              <div class="responsible">
+                <img [src]="task.responsibleAvatar" alt="" class="responsible__avatar" />
+                <div>
+                  <p class="responsible__label">RESPONSABLE</p>
+                  <p class="responsible__name">{{ task.responsible }}</p>
+                </div>
+              </div>
+              <button type="button" class="link-button">✎ Editar</button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="pagination">
+        <span>Página {{ currentPage() }} de {{ totalPages }} ({{ totalTasks }} tareas en total)</span>
+        <div class="pagination__controls">
+          <button
+            type="button"
+            class="pagination__arrow"
+            [disabled]="currentPage() === 1"
+            (click)="setPage(currentPage() - 1)"
+            aria-label="Página anterior"
+          >
+            ‹
+          </button>
+          @for (page of pages(); track page) {
+            <button
+              type="button"
+              class="pagination__page"
+              [class.pagination__page--active]="currentPage() === page"
+              (click)="setPage(page)"
+            >
+              {{ page }}
+            </button>
+          }
+          <button
+            type="button"
+            class="pagination__arrow"
+            [disabled]="currentPage() === totalPages"
+            (click)="setPage(currentPage() + 1)"
+            aria-label="Página siguiente"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</app-shell>

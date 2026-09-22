@@ -1,0 +1,191 @@
+<app-shell activeNav="assignment" breadcrumb="Vista de gestión">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Hogar / Gestión de cargas</p>
+      <h1>Asignación de Responsabilidades</h1>
+    </div>
+    <div class="page-heading__actions">
+      <button type="button" class="btn btn--ghost">✦ Auto-equilibrar con IA</button>
+      <button type="button" class="btn btn--primary">💾 Guardar asignación</button>
+    </div>
+  </div>
+
+  <section class="intro-banner">
+    <span class="intro-banner__icon" aria-hidden="true">⇄</span>
+    <div class="intro-banner__body">
+      <h2>Distribución asistida e interactiva</h2>
+      <p>
+        Arrastra las tarjetas o utiliza el menú rápido para distribuir las tareas pendientes. El
+        indicador global recalcula automáticamente los puntos de esfuerzo para prevenir el
+        agotamiento en el hogar.
+      </p>
+    </div>
+    <span class="mode-chip">
+      <span class="mode-chip__dot" aria-hidden="true"></span>
+      Modo de equilibrio activo
+    </span>
+  </section>
+
+  <section class="main-grid">
+    <div class="pending-card">
+      <div class="pending-card__header">
+        <span class="pending-card__icon" aria-hidden="true">📥</span>
+        <h2>Tareas pendientes</h2>
+        <span class="pill pill--warning">{{ pendingTasks().length }} por asignar</span>
+      </div>
+      <p class="pending-card__hint">Puntaje de dificultad calculado por esfuerzo físico y tiempo estimado.</p>
+
+      <ul class="pending-list">
+        @for (task of pendingTasks(); track task.id) {
+          <li
+            class="pending-item"
+            draggable="true"
+            (dragstart)="onDragStart(task.id)"
+            (dragend)="onDragEnd()"
+          >
+            <div class="pending-item__top">
+              <span class="drag-handle" aria-hidden="true">⣿</span>
+              <span class="pending-item__name">{{ task.name }}</span>
+              <span class="pill pill--warning">{{ task.points }} pts</span>
+            </div>
+            <p class="pending-item__meta">🕐 {{ task.duration }} · ⇄ {{ task.frequency }}</p>
+            <div class="pending-item__footer">
+              <span class="category-tag">{{ task.category }}</span>
+              <label class="quick-assign">
+                <span class="visually-hidden">Asignar {{ task.name }} a</span>
+                <select (change)="assignTask(task.id, $any($event.target).value)">
+                  <option value="" selected disabled>Asignar a...</option>
+                  @for (member of members(); track member.id) {
+                    <option [value]="member.id">{{ member.name }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <p class="pending-total">
+        Puntos totales pendientes: <strong>{{ totalPendingPoints() }} pts</strong>
+      </p>
+
+      <div class="tip-card">
+        <span aria-hidden="true">💡</span>
+        <div>
+          <h3>Consejo de convivencia</h3>
+          <p>
+            Mantener el margen de carga entre miembros por debajo del 15% de diferencia previene
+            el desgaste doméstico acumulado y fomenta la corresponsabilidad sin fricciones.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="balance-section">
+      <div class="balance-card">
+        <div class="balance-card__header">
+          <div>
+            <h2>Balance global de carga</h2>
+            <p>Distribución porcentual de los {{ totalCyclePoints }} puntos totales del ciclo activo</p>
+          </div>
+          @if (overloadedMember(); as overloaded) {
+            <span class="warning-chip">⚠ Desbalance detectado en {{ overloaded.name }}</span>
+          }
+        </div>
+
+        <div class="stacked-bar">
+          @for (member of members(); track member.id) {
+            <span
+              class="stacked-bar__segment"
+              [class]="'stacked-bar__segment--' + member.id"
+              [style.flexGrow]="globalSharePercentage(member)"
+            ></span>
+          }
+        </div>
+
+        <div class="stacked-legend">
+          @for (member of members(); track member.id) {
+            <span class="stacked-legend__item">
+              <span class="stacked-legend__dot" [class]="'stacked-legend__dot--' + member.id"></span>
+              {{ member.name.split(' ')[0] }} ({{ globalSharePercentage(member) }}%{{ isOverloaded(member) ? ' Exceso' : '' }})
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="member-grid">
+        @for (member of members(); track member.id) {
+          <div
+            class="member-card"
+            [class.member-card--overloaded]="isOverloaded(member)"
+            (dragover)="$event.preventDefault()"
+            (drop)="onDropOnMember(member.id)"
+          >
+            <div class="member-card__header">
+              <img [src]="member.avatar" alt="" class="member-card__avatar" />
+              <div class="member-card__identity">
+                <h3>{{ member.name }}</h3>
+                <p>{{ member.role === 'Coordinador' ? '🛡' : '👤' }} {{ member.role }}</p>
+              </div>
+              @if (isOverloaded(member)) {
+                <span class="status-chip status-chip--danger">! Sobrecarga (+{{ memberPoints(member) - member.suggestedLimit }} pts)</span>
+              } @else {
+                <span class="status-chip status-chip--ok">✓ {{ member.assignedTasks.length < 4 ? 'Disponible (+' + (4 - member.assignedTasks.length) + ' tarea)' : 'Equilibrado' }}</span>
+              }
+            </div>
+
+            <div class="capacity-row">
+              <span>{{ isOverloaded(member) ? 'Capacidad excedida' : 'Capacidad asignada' }}</span>
+              <strong>{{ memberPercentage(member) }}% ({{ memberPoints(member) }} pts)</strong>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-track__fill"
+                [class.progress-track__fill--danger]="isOverloaded(member)"
+                [style.width.%]="memberPercentage(member) > 100 ? 100 : memberPercentage(member)"
+              ></div>
+            </div>
+            <p class="capacity-note">
+              @if (isOverloaded(member)) {
+                {{ member.assignedTasks.length }} tareas asignadas (Límite sugerido: {{ member.suggestedLimit }} pts)
+              } @else {
+                {{ member.assignedTasks.length }} tareas asignadas (Capacidad para {{ member.suggestedLimit - memberPoints(member) }} pts más)
+              }
+            </p>
+
+            <p class="assigned-label">Tareas asignadas:</p>
+            <div class="task-chips">
+              @for (task of member.assignedTasks; track task.id) {
+                <span class="task-chip">
+                  {{ task.name }}
+                  <button
+                    type="button"
+                    (click)="unassignTask(member.id, task.id)"
+                    [attr.aria-label]="'Quitar ' + task.name"
+                  >
+                    ×
+                  </button>
+                </span>
+              }
+            </div>
+
+            <div class="drop-zone">
+              <span>⊕ Soltar tarea aquí para asignar</span>
+            </div>
+
+            @if (isOverloaded(member)) {
+              <div class="overload-warning">
+                ⚠ Evitar añadir más peso a {{ member.name.split(' ')[0] }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="rebalance-footer">
+        <span>↻ Último rebalanceo consensuado: Lunes, 10 de Marzo</span>
+        <a href="#" class="link-arrow">Ver historial de cargas</a>
+      </div>
+    </div>
+  </section>
+</app-shell>
