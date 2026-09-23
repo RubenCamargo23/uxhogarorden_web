@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 @Component({
@@ -15,8 +15,8 @@ export class Login {
   private readonly router = inject(Router);
 
   protected readonly form = this.formBuilder.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+    email: [''],
+    password: [''],
     rememberMe: [false],
   });
 
@@ -25,11 +25,6 @@ export class Login {
   }
 
   protected onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
     this.router.navigate(['/dashboard']);
   }
 }
