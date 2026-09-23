@@ -1,0 +1,217 @@
+<app-shell activeNav="mediation" breadcrumb="Vista de gestión">
+  <div class="page-heading">
+    <div>
+      <div class="page-heading__tags">
+        <span class="tag">Módulo de Convivencia</span>
+        <span class="tag tag--muted">Registro #2024-Q4</span>
+      </div>
+      <h1>Centro de Mediación y Acuerdos</h1>
+      <p>
+        Resolución colaborativa de conflictos y renegociación de turnos del hogar mediante
+        acuerdos consensuados.
+      </p>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric__label">Tasa de resolución</span>
+        <strong class="metric__value">{{ resolutionRate }}</strong>
+      </div>
+      <div class="metric">
+        <span class="metric__label">Tiempo medio</span>
+        <strong class="metric__value">{{ averageTime }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <section class="mediation-grid">
+    <div class="cases-card">
+      <div class="cases-card__header">
+        <span class="cases-card__icon" aria-hidden="true">⚖</span>
+        <h2>Disputas y desacuerdos abiertos</h2>
+        <button type="button" class="icon-button icon-button--ghost" aria-label="Actualizar">↻</button>
+      </div>
+
+      <div class="tabs">
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeFilter() === 'all'"
+          (click)="setFilter('all')"
+        >
+          Todos ({{ caseCounts.all }})
+        </button>
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeFilter() === 'open'"
+          (click)="setFilter('open')"
+        >
+          Abiertos ({{ caseCounts.open }})
+        </button>
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeFilter() === 'resolved'"
+          (click)="setFilter('resolved')"
+        >
+          Resueltos ({{ caseCounts.resolved }})
+        </button>
+      </div>
+
+      <ul class="case-list">
+        @for (mediationCase of filteredCases(); track mediationCase.id) {
+          <li>
+            <button
+              type="button"
+              class="case-item"
+              [class.case-item--active]="selectedCaseId() === mediationCase.id"
+              (click)="selectCase(mediationCase.id)"
+            >
+              <div class="case-item__meta">
+                <span class="case-item__id">Caso #{{ mediationCase.id }}</span>
+                <span class="case-item__age">· {{ mediationCase.openedAgo }}</span>
+                <span class="status-chip" [class]="'status-chip--' + mediationCase.status">
+                  ● {{ statusLabel(mediationCase.status) }}
+                </span>
+              </div>
+              <h3>{{ mediationCase.title }}</h3>
+              <p class="case-item__detail">📋 Tarea: {{ mediationCase.task }}</p>
+              <p class="case-item__detail">👥 {{ mediationCase.status === 'resolved' ? 'Involucrados' : 'Partes' }}: {{ mediationCase.parties }}</p>
+              <div class="case-item__footer">
+                <div class="avatar-stack">
+                  @for (initials of mediationCase.partyInitials; track initials) {
+                    <span class="avatar-stack__item">{{ initials }}</span>
+                  }
+                </div>
+                <span class="link-arrow">{{ mediationCase.status === 'resolved' ? 'Ver pacto histórico' : 'Ver expediente' }} ›</span>
+              </div>
+            </button>
+          </li>
+        }
+      </ul>
+
+      <div class="rule-card">
+        <span class="rule-card__icon" aria-hidden="true">🛡</span>
+        <div>
+          <h3>Regla del Hogar #4</h3>
+          <p>
+            Cualquier renegociación aceptada por ambas partes actualiza los turnos automáticos
+            del calendario semanal.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="case-detail">
+      <div class="case-detail__header">
+        <div>
+          <p class="case-detail__eyebrow">EXPEDIENTE DOMÉSTICO · Ref: {{ selectedCase().reference }}</p>
+          <h2>Caso #{{ selectedCase().id }}: {{ selectedCase().title }}</h2>
+        </div>
+        <span class="status-chip" [class]="'status-chip--' + selectedCase().status">
+          ● {{ statusLabel(selectedCase().status) }}
+        </span>
+      </div>
+
+      <div class="parties-panel">
+        <div class="parties-panel__person">
+          <img src="https://i.pravatar.cc/64?img=12" alt="" class="parties-panel__avatar" />
+          <div>
+            <p class="parties-panel__name">Rubén C.</p>
+            <p class="parties-panel__role">Reportó el incumplimiento</p>
+            <p class="parties-panel__load">Carga sem.: 6 tareas</p>
+          </div>
+        </div>
+        <div class="parties-panel__status">
+          <span aria-hidden="true">⇄</span>
+          Mediando
+        </div>
+        <div class="parties-panel__person parties-panel__person--right">
+          <div>
+            <p class="parties-panel__name">Sofía R.</p>
+            <p class="parties-panel__role">Miembro asignada</p>
+            <p class="parties-panel__load">Carga sem.: 4 tareas</p>
+          </div>
+          <img src="https://i.pravatar.cc/64?img=47" alt="" class="parties-panel__avatar" />
+        </div>
+      </div>
+
+      <div class="incident-card">
+        <p class="incident-card__label">ⓘ DESCRIPCIÓN DEL INCIDENTE</p>
+        <blockquote>
+          "El domingo por la noche los platos quedaron acumulados en el fregadero después de la
+          cena familiar y no se limpió la encimera como estaba programado."
+        </blockquote>
+        <p class="incident-card__meta">📅 Domingo 13 Oct, 22:30 &nbsp;·&nbsp; 🏠 Zona: Cocina</p>
+      </div>
+
+      <div class="impact-card">
+        <img
+          src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=200&q=80"
+          alt="Fotografía de evidencia del incidente en la cocina"
+          class="impact-card__image"
+        />
+        <div>
+          <p class="impact-card__title">Impacto en el flujo doméstico</p>
+          <p class="impact-card__detail">
+            Retrasó la preparación del desayuno matutino en 20 minutos el lunes. Rubén asumió el
+            enjuague previo.
+          </p>
+        </div>
+      </div>
+
+      <div class="argument-thread">
+        <div class="argument-thread__header">
+          <h3>Intercambio de posturas y argumentos</h3>
+          <span>{{ argumentThread.length }} intervenciones registradas</span>
+        </div>
+
+        @for (entry of argumentThread; track entry.timestamp) {
+          <div class="argument-entry">
+            <span class="argument-entry__dot" aria-hidden="true"></span>
+            <div class="argument-entry__body">
+              <p class="argument-entry__meta">
+                <strong>{{ entry.author }}</strong> {{ entry.timestamp }}
+                <span class="tag tag--muted">{{ entry.tag }}</span>
+              </p>
+              <p class="argument-entry__message">"{{ entry.message }}"</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="proposal-card">
+        <div class="proposal-card__header">
+          <span class="proposal-card__icon" aria-hidden="true">🖊</span>
+          <div>
+            <h3>Propuesta formal de resolución</h3>
+            <p>Acuerdo listo para ratificación y firma digital</p>
+          </div>
+          <span class="tag tag--accent">Compensatorio 2:1</span>
+        </div>
+
+        <p class="proposal-card__text">
+          Reasignar los <strong>2 turnos de cocina</strong> a Sofía R. para martes 15 y jueves 17.
+          Bonificar <strong>5 puntos compensatorios</strong> a Rubén C. en el balance de esfuerzo
+          mensual.
+        </p>
+
+        <label class="checkbox-field">
+          <input type="checkbox" checked />
+          Notificar a los demás convivientes sobre la reasignación de cocina
+        </label>
+        <label class="checkbox-field">
+          <input type="checkbox" checked />
+          Sincronizar automáticamente con Google Calendar / Vista de Tareas
+        </label>
+
+        <p class="proposal-card__expiry">🔒 Vence en: 18 horas</p>
+
+        <div class="proposal-card__actions">
+          <button type="button" class="btn btn--ghost">Cerrar caso</button>
+          <button type="button" class="btn btn--primary">⚙ Proponer acuerdo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</app-shell>

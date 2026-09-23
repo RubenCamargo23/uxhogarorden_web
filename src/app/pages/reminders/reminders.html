@@ -1,0 +1,232 @@
+<app-shell activeNav="reminders" breadcrumb="Recordatorios y Alertas">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">🕐 Automatización residencial</p>
+      <h1>Recordatorios y Alertas</h1>
+      <p>
+        Armonía diaria sin microgestión verbal. Notificaciones puntuales multicanal para
+        preservar la paz y la responsabilidad compartida.
+      </p>
+    </div>
+    <div class="summary-chips">
+      <span class="summary-chip">
+        <span class="summary-chip__dot" aria-hidden="true"></span>
+        {{ activeAlertsCount }} Alertas Activas
+      </span>
+      <span class="summary-chip">⚙ {{ deliveryRate }} Entregados</span>
+    </div>
+  </div>
+
+  <section class="reminders-card">
+    <div class="reminders-card__header">
+      <div>
+        <h2>Notificaciones programadas</h2>
+        <p>Alertas activas para asegurar el cumplimiento sin fricciones</p>
+      </div>
+      <div class="tabs">
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeChannelFilter() === 'all'"
+          (click)="setChannelFilter('all')"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeChannelFilter() === 'whatsapp'"
+          (click)="setChannelFilter('whatsapp')"
+        >
+          WhatsApp
+        </button>
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeChannelFilter() === 'push'"
+          (click)="setChannelFilter('push')"
+        >
+          Push
+        </button>
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeChannelFilter() === 'email'"
+          (click)="setChannelFilter('email')"
+        >
+          Email
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Responsable</th>
+            <th>Hora y Días</th>
+            <th>Canal</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (reminder of filteredReminders(); track reminder.name) {
+            <tr>
+              <td class="task-cell">
+                <span class="task-cell__icon">{{ reminder.icon }}</span>
+                <div>
+                  <p class="task-cell__name">{{ reminder.name }}</p>
+                  <p class="task-cell__zone">{{ reminder.zone }}</p>
+                </div>
+              </td>
+              <td>
+                <div class="assignee">
+                  @if (reminder.responsibleAvatar) {
+                    <img [src]="reminder.responsibleAvatar" alt="" class="assignee__avatar" />
+                  } @else {
+                    <span class="assignee__placeholder" aria-hidden="true"></span>
+                  }
+                  {{ reminder.responsible }}
+                </div>
+              </td>
+              <td>
+                <p class="time-cell__time">{{ reminder.time }}</p>
+                <p class="time-cell__frequency">{{ reminder.frequency }}</p>
+              </td>
+              <td>
+                <span class="channel-chip" [class]="'channel-chip--' + reminder.channel">
+                  {{ reminder.channelLabel }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="switch"
+                  [class.switch--on]="reminder.active"
+                  role="switch"
+                  [attr.aria-checked]="reminder.active"
+                  [attr.aria-label]="'Alternar recordatorio ' + reminder.name"
+                  (click)="toggleReminder(reminder)"
+                >
+                  <span class="switch__knob"></span>
+                </button>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" class="icon-action" aria-label="Editar recordatorio">✎</button>
+                  <button
+                    type="button"
+                    class="icon-action"
+                    aria-label="Eliminar recordatorio"
+                    (click)="removeReminder(reminder)"
+                  >
+                    🗑
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="distribution-card">
+    <span class="distribution-card__label">▤ Distribución Horaria Sugerida</span>
+    <div class="distribution-bar">
+      <span class="distribution-bar__segment distribution-bar__segment--low"></span>
+      <span class="distribution-bar__segment distribution-bar__segment--medium"></span>
+      <span class="distribution-bar__segment distribution-bar__segment--high"></span>
+    </div>
+    <span class="distribution-card__hint">{{ lowStressWindow }}</span>
+  </section>
+
+  <section class="form-card">
+    <div class="form-card__header">
+      <span class="form-card__icon" aria-hidden="true">🔔</span>
+      <div>
+        <h2>Nuevo recordatorio</h2>
+        <p>Configura una alerta recurrente para un miembro</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-field">
+        <label for="task">Seleccionar tarea</label>
+        <select id="task" formControlName="task">
+          <option value="" disabled>Elige una tarea de la lista...</option>
+          <option value="Sacar la basura">Sacar la basura</option>
+          <option value="Lavar los platos de cena">Lavar los platos de cena</option>
+          <option value="Aspirar y fregar sala">Aspirar y fregar sala</option>
+          <option value="Compras de supermercado">Compras de supermercado</option>
+          <option value="Desinfección de baños">Desinfección de baños</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="responsible">Responsable</label>
+        <select id="responsible" formControlName="responsible">
+          <option value="" disabled>Asignar miembro del hogar...</option>
+          <option value="Rubén C.">Rubén C.</option>
+          <option value="Sofía R.">Sofía R.</option>
+          <option value="Mateo C.">Mateo C.</option>
+          <option value="Lucía C.">Lucía C.</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="sendTime">Hora de envío</label>
+          <input id="sendTime" type="text" formControlName="sendTime" />
+        </div>
+        <div class="form-field">
+          <label for="repetition">Repetición</label>
+          <select id="repetition" formControlName="repetition">
+            <option value="Diaria">Diaria</option>
+            <option value="Semanal">Semanal</option>
+            <option value="Mensual">Mensual</option>
+          </select>
+        </div>
+      </div>
+
+      <fieldset class="form-field form-field--fieldset">
+        <legend class="form-field__label">Canal de notificación</legend>
+        <div class="channel-picker">
+          @for (option of channelOptions; track option.key) {
+            <button
+              type="button"
+              class="channel-picker__option"
+              [class.channel-picker__option--active]="form.value.channel === option.key"
+              [attr.aria-pressed]="form.value.channel === option.key"
+              (click)="selectChannel(option.key)"
+            >
+              <span>{{ option.icon }}</span>
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </fieldset>
+
+      <div class="form-field">
+        <label for="message">Mensaje personalizado <span class="optional-tag">Opcional</span></label>
+        <textarea
+          id="message"
+          formControlName="message"
+          rows="3"
+          placeholder="Escribe un mensaje personalizado..."
+        ></textarea>
+      </div>
+
+      <label class="checkbox-field">
+        <input type="checkbox" formControlName="sendReminderBefore" />
+        Enviar recordatorio previo 15 minutos antes
+      </label>
+
+      <button type="submit" class="btn btn--primary btn--full">
+        ✓ Programar recordatorio
+      </button>
+    </form>
+  </section>
+</app-shell>

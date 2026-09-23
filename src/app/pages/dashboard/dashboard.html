@@ -1,0 +1,218 @@
+<app-shell activeNav="dashboard" breadcrumb="Vista de gestión">
+  <p class="status-line">
+    <span class="status-dot" aria-hidden="true"></span>
+    SINCRONIZACIÓN FAMILIAR ACTIVA · SEMANA 42
+  </p>
+
+  <div class="page-heading">
+    <div>
+      <h1>Tablero principal</h1>
+      <p>Ritmo operativo, seguimiento equilibrado de tareas del hogar y asignación colaborativa en tiempo real.</p>
+    </div>
+    <div class="page-heading__actions">
+      <button type="button" class="btn btn--ghost">
+        📅 Octubre 2024
+      </button>
+      <button type="button" class="btn btn--primary">
+        ⊕ Asignar tarea
+      </button>
+    </div>
+  </div>
+
+  <section class="stats-grid">
+    @for (stat of stats; track stat.label) {
+      <article class="stat-card">
+        <div class="stat-card__top">
+          <span class="stat-card__label">{{ stat.label }}</span>
+          <span class="stat-card__icon" [class]="'stat-card__icon--' + stat.tone">
+            @switch (stat.icon) {
+              @case ('calendar') { 📅 }
+              @case ('clock') { ⏰ }
+              @case ('check') { ✅ }
+              @case ('home') { 🏠 }
+            }
+          </span>
+        </div>
+        <p class="stat-card__value">{{ stat.value }} <span>{{ stat.unit }}</span></p>
+        <p class="stat-card__note">{{ stat.note }}</p>
+      </article>
+    }
+  </section>
+
+  <section class="harmony-banner">
+    <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=200&q=80" alt="" class="harmony-banner__image" />
+    <div class="harmony-banner__body">
+      <h2>Armonía y orden de convivencia</h2>
+      <p>
+        El 84% de las responsabilidades rutinarias están asignadas a tiempo. Mantén la
+        rotación fluida para evitar sobrecargas individuales.
+      </p>
+    </div>
+    <span class="pill pill--success">🌿 Ambiente saludable</span>
+  </section>
+
+  <section class="content-grid">
+    <div class="tasks-card">
+      <div class="tasks-card__header">
+        <div>
+          <h2>Tareas de la semana</h2>
+          <p>Gestión de itinerarios diarios e inspección de cumplimiento</p>
+        </div>
+        <div class="tabs">
+          <button
+            type="button"
+            class="tab"
+            [class.tab--active]="activeFilter() === 'all'"
+            (click)="setFilter('all')"
+          >
+            Todas
+          </button>
+          <button
+            type="button"
+            class="tab"
+            [class.tab--active]="activeFilter() === 'pending'"
+            (click)="setFilter('pending')"
+          >
+            Pendientes
+          </button>
+          <button
+            type="button"
+            class="tab"
+            [class.tab--active]="activeFilter() === 'in-progress'"
+            (click)="setFilter('in-progress')"
+          >
+            En curso
+          </button>
+          <button
+            type="button"
+            class="tab"
+            [class.tab--active]="activeFilter() === 'done'"
+            (click)="setFilter('done')"
+          >
+            Hechas
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Tarea</th>
+              <th>Responsable</th>
+              <th>Fecha límite</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (task of filteredTasks(); track task.name) {
+              <tr>
+                <td class="task-name">
+                  <span class="task-name__icon">{{ task.icon }}</span>
+                  {{ task.name }}
+                </td>
+                <td>
+                  <div class="assignee">
+                    <span class="assignee__avatar">{{ task.assigneeInitials }}</span>
+                    {{ task.assignee }}
+                  </div>
+                </td>
+                <td>{{ task.dueDate }}</td>
+                <td>
+                  <span class="status-badge" [class]="'status-badge--' + task.status">
+                    ● {{ statusLabel(task.status) }}
+                  </span>
+                </td>
+                <td><button type="button" class="link-button">Editar</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tasks-card__footer">
+        <span>Mostrando {{ tasks.length }} tareas activas para esta semana</span>
+        <a href="#" class="link-arrow">Ver registro histórico →</a>
+      </div>
+    </div>
+
+    <aside class="balance-card" aria-label="Balance de carga por miembro">
+      <div class="balance-card__header">
+        <div>
+          <h2>Balance de carga</h2>
+          <p>Distribución actual de tareas activas por miembro</p>
+        </div>
+        <span aria-hidden="true">⚙</span>
+      </div>
+
+      <ul class="balance-list">
+        @for (member of memberLoad; track member.name) {
+          <li>
+            <div class="balance-list__row">
+              <span class="balance-list__name">{{ member.name }} <small>({{ member.tasks }} tareas)</small></span>
+              @if (member.level === 'high') {
+                <span class="load-tag load-tag--high">{{ loadLevelLabel(member.level) }}</span>
+              } @else if (member.level === 'light') {
+                <span class="load-tag load-tag--light">{{ loadLevelLabel(member.level) }}</span>
+              } @else {
+                <span class="load-tag load-tag--balanced">{{ loadLevelLabel(member.level) }}</span>
+              }
+              <span class="balance-list__percentage">{{ member.percentage }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div
+                class="progress-bar__fill"
+                [class.progress-bar__fill--high]="member.level === 'high'"
+                [style.width.%]="member.percentage"
+              ></div>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <div class="donut-wrapper">
+        <div
+          class="donut"
+          [style.background]="
+            'conic-gradient(#3a6f60 0% 32%, #c1442b 32% 70%, #3a6f60 70% 88%, #c1442b 88% 100%)'
+          "
+        >
+          <div class="donut__hole">
+            <span class="donut__value">{{ totalActiveTasks }}</span>
+            <span class="donut__label">Total</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="recommendation-card">
+        <span class="recommendation-card__icon" aria-hidden="true">💡</span>
+        <div>
+          <h3>Recomendación del sistema</h3>
+          <p>{{ recommendation }}</p>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn--outline btn--full">
+        ⚖ Equilibrar automáticamente
+      </button>
+    </aside>
+  </section>
+
+  <section class="milestone-card">
+    <div class="milestone-card__header">
+      <h2>Próximo hito común</h2>
+      <span aria-hidden="true">🔔</span>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-item__date">
+        <span>{{ upcomingMilestone.day }}</span>
+        <strong>{{ upcomingMilestone.date }}</strong>
+      </div>
+      <div>
+        <p class="milestone-item__title">{{ upcomingMilestone.title }}</p>
+        <p class="milestone-item__detail">{{ upcomingMilestone.detail }}</p>
+      </div>
+    </div>
+  </section>
+</app-shell>
